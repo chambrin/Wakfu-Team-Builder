@@ -111,6 +111,24 @@ export interface TeamWarning {
   message: string;
 }
 
+export type DungeonDifficulty = 'debutant' | 'intermediaire' | 'avance' | 'expert' | 'endgame';
+
+export interface Dungeon {
+  id: string;
+  name: string;
+  levelMin: number;
+  levelMax: number;
+  zone: string;
+  boss: string;
+  tier: number; // 1-15
+  difficulty: DungeonDifficulty;
+  mechanics: string[];
+  /** IDs de classes particulièrement utiles (ordre de priorité) */
+  recommendedClasses: string[];
+  tips: string;
+  emoji: string;
+}
+
 /** Force ou faiblesse calculée dynamiquement pour l'équipe */
 export interface TeamInsight {
   type: 'strength' | 'weakness';

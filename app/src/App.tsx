@@ -6,20 +6,25 @@ import { ClassDetail } from './components/ClassDetail';
 import { TeamAnalysis } from './components/TeamAnalysis';
 import { TeamOverview } from './components/TeamOverview';
 import { PresetSelector } from './components/PresetSelector';
+import { DungeonBrowser } from './components/DungeonBrowser';
+import { DungeonDetail } from './components/DungeonDetail';
 import { useTeamAnalysis } from './hooks/useTeamAnalysis';
-import type { WakfuClass, PresetTeam, SlotState } from './types';
+import type { WakfuClass, PresetTeam, SlotState, Dungeon } from './types';
 
 const EMPTY_SLOT: SlotState = { classId: null, playstyleId: null };
 const INITIAL_SLOTS: SlotState[] = Array(6).fill(null).map(() => ({ ...EMPTY_SLOT }));
 
 type ActivePanel = 'analysis' | 'overview';
+type AppMode = 'builder' | 'donjons';
 
 export function App() {
+  const [appMode, setAppMode] = useState<AppMode>('builder');
   const [slots, setSlots] = useState<SlotState[]>(INITIAL_SLOTS);
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [selectedClass, setSelectedClass] = useState<WakfuClass | null>(null);
   const [activePanel, setActivePanel] = useState<ActivePanel>('overview');
   const [showPresets, setShowPresets] = useState(false);
+  const [selectedDungeon, setSelectedDungeon] = useState<Dungeon | null>(null);
 
   const analysis = useTeamAnalysis(slots);
 
@@ -101,6 +106,22 @@ export function App() {
     if (cls) setSelectedClass(cls);
   }, []);
 
+  const handleLoadDungeonCompo = useCallback((newSlots: SlotState[]) => {
+    setSlots(newSlots);
+    setAppMode('builder');
+    setActiveSlot(null);
+    setSelectedClass(null);
+    setActivePanel('overview');
+  }, []);
+
+  const handleDungeonClassClick = useCallback((classId: string) => {
+    const cls = CLASS_MAP.get(classId);
+    if (cls) {
+      setSelectedClass(cls);
+      setAppMode('builder');
+    }
+  }, []);
+
   const filledCount = slots.filter((s) => s.classId !== null).length;
   const teamClassIds = slots.map((s) => s.classId);
 
@@ -119,154 +140,240 @@ export function App() {
             </div>
           </div>
 
+          {/* Mode switcher */}
+          <div className="flex items-center gap-1 bg-slate-800/60 rounded-xl p-1 border border-slate-700/60">
+            <button
+              onClick={() => setAppMode('builder')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                appMode === 'builder'
+                  ? 'bg-amber-600/30 text-amber-300 border border-amber-600/40'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+            >
+              ⚔️ Team Builder
+            </button>
+            <button
+              onClick={() => setAppMode('donjons')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                appMode === 'donjons'
+                  ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-600/40'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+            >
+              🏰 Donjons
+            </button>
+          </div>
+
           <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 mr-2">
-              <span className="text-amber-400 font-bold">{filledCount}</span>/6 classes
-            </div>
-            <button
-              onClick={() => setShowPresets(true)}
-              className="px-3 py-1.5 rounded-xl bg-indigo-600/20 border border-indigo-600/40 text-indigo-300 text-xs font-medium hover:bg-indigo-600/30 transition-all"
-            >
-              📋 Presets
-            </button>
-            <button
-              onClick={handleReset}
-              className="px-3 py-1.5 rounded-xl bg-red-900/20 border border-red-800/40 text-red-400 text-xs font-medium hover:bg-red-900/30 transition-all"
-            >
-              🗑️ Reset
-            </button>
+            {appMode === 'builder' && (
+              <>
+                <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400">
+                  <span className="text-amber-400 font-bold">{filledCount}</span>/6 classes
+                </div>
+                <button
+                  onClick={() => setShowPresets(true)}
+                  className="px-3 py-1.5 rounded-xl bg-indigo-600/20 border border-indigo-600/40 text-indigo-300 text-xs font-medium hover:bg-indigo-600/30 transition-all"
+                >
+                  📋 Presets
+                </button>
+                <button
+                  onClick={handleReset}
+                  className="px-3 py-1.5 rounded-xl bg-red-900/20 border border-red-800/40 text-red-400 text-xs font-medium hover:bg-red-900/30 transition-all"
+                >
+                  🗑️ Reset
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Team Slots */}
-      <div className="border-b border-slate-800/60 bg-slate-900/30">
-        <div className="max-w-[1600px] mx-auto px-4 py-4">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">
-              Composition de l'équipe
-            </div>
-            {activeSlot !== null && (
-              <div className="text-xs text-amber-400 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block"></span>
-                Slot {activeSlot + 1} actif — cliquez une classe pour l'assigner
+      {/* ── TEAM BUILDER MODE ─────────────────────────────────────────────── */}
+      {appMode === 'builder' && (
+        <>
+          {/* Team Slots */}
+          <div className="border-b border-slate-800/60 bg-slate-900/30">
+            <div className="max-w-[1600px] mx-auto px-4 py-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">
+                  Composition de l'équipe
+                </div>
+                {activeSlot !== null && (
+                  <div className="text-xs text-amber-400 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block"></span>
+                    Slot {activeSlot + 1} actif — cliquez une classe pour l'assigner
+                  </div>
+                )}
               </div>
-            )}
+              <div className="grid grid-cols-6 gap-3">
+                {slots.map((slot, i) => (
+                  <TeamSlot
+                    key={i}
+                    slotIndex={i}
+                    slot={slot}
+                    isActive={activeSlot === i}
+                    onClick={() => handleSlotClick(i)}
+                    onRemove={() => handleRemoveFromSlot(i)}
+                    onPlaystyleChange={(playstyleId) => handlePlaystyleChange(i, playstyleId)}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="grid grid-cols-6 gap-3">
-            {slots.map((slot, i) => (
-              <TeamSlot
-                key={i}
-                slotIndex={i}
-                slot={slot}
-                isActive={activeSlot === i}
-                onClick={() => handleSlotClick(i)}
-                onRemove={() => handleRemoveFromSlot(i)}
-                onPlaystyleChange={(playstyleId) => handlePlaystyleChange(i, playstyleId)}
+
+          {/* Main content */}
+          <div className="flex-1 max-w-[1600px] mx-auto w-full px-4 py-4 flex gap-4 overflow-hidden">
+            {/* Left: Browser */}
+            <div className="w-64 shrink-0 flex flex-col">
+              <div className="bg-slate-900/50 rounded-2xl border border-slate-800/60 p-4 flex flex-col flex-1 overflow-hidden">
+                <h2 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <span>🧙</span> Classes (18)
+                </h2>
+                <ClassBrowser
+                  selectedClassId={selectedClass?.id ?? null}
+                  teamClassIds={teamClassIds}
+                  onSelectClass={handleSelectClass}
+                />
+              </div>
+            </div>
+
+            {/* Center: Class Detail */}
+            <div className="flex-1 min-w-0 overflow-y-auto">
+              {selectedClass ? (
+                <ClassDetail
+                  cls={selectedClass}
+                  teamClassIds={teamClassIds}
+                  onAddAlternative={handleAlternativeClick}
+                />
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center text-center gap-4 py-12">
+                  <div className="text-6xl opacity-30">⚔️</div>
+                  <div>
+                    <div className="text-slate-400 font-medium mb-1">Sélectionnez une classe</div>
+                    <div className="text-slate-500 text-xs max-w-sm">
+                      Cliquez sur un slot pour l'activer, puis sélectionnez une classe dans la liste.
+                      Ou choisissez une compo préétablie via le bouton Presets.
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 mt-2 max-w-md text-xs text-slate-500">
+                    <div className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/40">
+                      <div className="text-lg mb-1">1️⃣</div>
+                      <div>Cliquez un slot pour l'activer</div>
+                    </div>
+                    <div className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/40">
+                      <div className="text-lg mb-1">2️⃣</div>
+                      <div>Sélectionnez une classe à gauche</div>
+                    </div>
+                    <div className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/40">
+                      <div className="text-lg mb-1">3️⃣</div>
+                      <div>Analysez votre team à droite</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right: Analysis / Overview */}
+            <div className="w-72 shrink-0">
+              <div className="flex gap-1 mb-3 bg-slate-900/50 rounded-xl p-1 border border-slate-800/60">
+                <button
+                  onClick={() => setActivePanel('overview')}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    activePanel === 'overview'
+                      ? 'bg-slate-700 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-300'
+                  }`}
+                >
+                  👥 Vue Équipe
+                </button>
+                <button
+                  onClick={() => setActivePanel('analysis')}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    activePanel === 'analysis'
+                      ? 'bg-slate-700 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-300'
+                  }`}
+                >
+                  📊 Analyse
+                </button>
+              </div>
+
+              <div className="overflow-y-auto max-h-[calc(100vh-280px)]">
+                {activePanel === 'overview' ? (
+                  <TeamOverview
+                    slots={slots}
+                    insights={analysis.insights}
+                    coverage={analysis.coverage}
+                    score={analysis.score}
+                  />
+                ) : (
+                  <TeamAnalysis
+                    coverage={analysis.coverage}
+                    activeSynergies={analysis.activeSynergies}
+                    warnings={analysis.warnings}
+                    score={analysis.score}
+                    teamSize={analysis.teamSize}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── DONJONS MODE ──────────────────────────────────────────────────── */}
+      {appMode === 'donjons' && (
+        <div className="flex-1 max-w-[1600px] mx-auto w-full px-4 py-4 flex gap-4 overflow-hidden">
+          {/* Left: Dungeon browser */}
+          <div className="w-72 shrink-0 flex flex-col">
+            <div className="bg-slate-900/50 rounded-2xl border border-slate-800/60 p-4 flex flex-col flex-1 overflow-hidden">
+              <h2 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <span>🏰</span> Donjons (107)
+              </h2>
+              <DungeonBrowser
+                selectedDungeonId={selectedDungeon?.id ?? null}
+                onSelectDungeon={setSelectedDungeon}
               />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="flex-1 max-w-[1600px] mx-auto w-full px-4 py-4 flex gap-4 overflow-hidden">
-        {/* Left: Browser */}
-        <div className="w-64 shrink-0 flex flex-col">
-          <div className="bg-slate-900/50 rounded-2xl border border-slate-800/60 p-4 flex flex-col flex-1 overflow-hidden">
-            <h2 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <span>🧙</span> Classes ({18})
-            </h2>
-            <ClassBrowser
-              selectedClassId={selectedClass?.id ?? null}
-              teamClassIds={teamClassIds}
-              onSelectClass={handleSelectClass}
-            />
-          </div>
-        </div>
-
-        {/* Center: Class Detail */}
-        <div className="flex-1 min-w-0 overflow-y-auto">
-          {selectedClass ? (
-            <ClassDetail
-              cls={selectedClass}
-              teamClassIds={teamClassIds}
-              onAddAlternative={handleAlternativeClick}
-            />
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center gap-4 py-12">
-              <div className="text-6xl opacity-30">⚔️</div>
-              <div>
-                <div className="text-slate-400 font-medium mb-1">Sélectionnez une classe</div>
-                <div className="text-slate-500 text-xs max-w-sm">
-                  Cliquez sur un slot pour l'activer, puis sélectionnez une classe dans la liste pour l'assigner.
-                  Ou choisissez une compo préétablie via le bouton Presets.
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-3 mt-2 max-w-md text-xs text-slate-500">
-                <div className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/40">
-                  <div className="text-lg mb-1">1️⃣</div>
-                  <div>Cliquez un slot pour l'activer</div>
-                </div>
-                <div className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/40">
-                  <div className="text-lg mb-1">2️⃣</div>
-                  <div>Sélectionnez une classe à gauche</div>
-                </div>
-                <div className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/40">
-                  <div className="text-lg mb-1">3️⃣</div>
-                  <div>Analysez votre team à droite</div>
-                </div>
-              </div>
             </div>
-          )}
-        </div>
-
-        {/* Right: Analysis / Overview */}
-        <div className="w-72 shrink-0">
-          {/* Panel switcher */}
-          <div className="flex gap-1 mb-3 bg-slate-900/50 rounded-xl p-1 border border-slate-800/60">
-            <button
-              onClick={() => setActivePanel('overview')}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                activePanel === 'overview'
-                  ? 'bg-slate-700 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-300'
-              }`}
-            >
-              👥 Vue Équipe
-            </button>
-            <button
-              onClick={() => setActivePanel('analysis')}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                activePanel === 'analysis'
-                  ? 'bg-slate-700 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-300'
-              }`}
-            >
-              📊 Analyse
-            </button>
           </div>
 
-          <div className="overflow-y-auto max-h-[calc(100vh-280px)]">
-            {activePanel === 'overview' ? (
-              <TeamOverview
-                slots={slots}
-                insights={analysis.insights}
-                coverage={analysis.coverage}
-                score={analysis.score}
+          {/* Center: Dungeon detail */}
+          <div className="flex-1 min-w-0 overflow-y-auto">
+            {selectedDungeon ? (
+              <DungeonDetail
+                dungeon={selectedDungeon}
+                onLoadComposition={handleLoadDungeonCompo}
+                onSelectClass={handleDungeonClassClick}
               />
             ) : (
-              <TeamAnalysis
-                coverage={analysis.coverage}
-                activeSynergies={analysis.activeSynergies}
-                warnings={analysis.warnings}
-                score={analysis.score}
-                teamSize={analysis.teamSize}
-              />
+              <div className="h-full flex flex-col items-center justify-center text-center gap-4 py-12">
+                <div className="text-6xl opacity-30">🏰</div>
+                <div>
+                  <div className="text-slate-400 font-medium mb-1">Sélectionnez un donjon</div>
+                  <div className="text-slate-500 text-xs max-w-sm">
+                    Parcourez les 107 donjons du jeu, consultez leurs mécaniques, et chargez
+                    la composition recommandée directement dans le Team Builder.
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-3 mt-2 max-w-md text-xs text-slate-500">
+                  <div className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/40">
+                    <div className="text-lg mb-1">🔍</div>
+                    <div>Filtrez par niveau et difficulté</div>
+                  </div>
+                  <div className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/40">
+                    <div className="text-lg mb-1">⚙️</div>
+                    <div>Lisez les mécaniques et astuces</div>
+                  </div>
+                  <div className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/40">
+                    <div className="text-lg mb-1">⚡</div>
+                    <div>Chargez la compo recommandée</div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
-      </div>
+      )}
 
       {/* Preset Modal */}
       {showPresets && (
