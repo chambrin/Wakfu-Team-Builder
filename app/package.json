@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist -r https://chambrin@github.com/chambrin/Wakfu-Team-Builder.git"
+    "deploy": "npm run build && touch dist/.nojekyll && gh-pages -d dist --dotfiles -r https://chambrin@github.com/chambrin/Wakfu-Team-Builder.git"
   },
   "dependencies": {
     "react": "^18.3.1",
