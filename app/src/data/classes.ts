@@ -1,4 +1,5 @@
 import type { WakfuClass } from '../types';
+import { CLASS_PLAYSTYLES } from './playstyles';
 
 export const CLASSES: WakfuClass[] = [
   {
@@ -66,6 +67,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['sacrieur', 'ouginak', 'sram', 'ecaflip'],
     tier: 'Référence historique DPT mêlée, constamment compétitif',
+    playstyles: CLASS_PLAYSTYLES['iop'],
   },
   {
     id: 'cra',
@@ -127,6 +129,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['xelor', 'eliotrope', 'steamer', 'huppermage'],
     tier: 'Constamment dans la méta comme référence DPT distance',
+    playstyles: CLASS_PLAYSTYLES['cra'],
   },
   {
     id: 'feca',
@@ -193,6 +196,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['pandawa', 'sacrieur', 'steamer'],
     tier: 'Systématiquement recommandé dans les contenus PvM haut niveau',
+    playstyles: CLASS_PLAYSTYLES['feca'],
   },
   {
     id: 'sacrieur',
@@ -258,6 +262,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['iop', 'ouginak', 'feca', 'pandawa'],
     tier: 'Solide en PvM, redoutable avec un bon healer en multicompte',
+    playstyles: CLASS_PLAYSTYLES['sacrieur'],
   },
   {
     id: 'pandawa',
@@ -324,6 +329,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['feca', 'eliotrope', 'zobal'],
     tier: 'Référence absolue en placement, systématiquement recommandé',
+    playstyles: CLASS_PLAYSTYLES['pandawa'],
   },
   {
     id: 'eniripsa',
@@ -389,6 +395,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['zobal', 'sadida', 'osamodas'],
     tier: 'Systématiquement recommandée comme healer principal en PvM',
+    playstyles: CLASS_PLAYSTYLES['eniripsa'],
   },
   {
     id: 'osamodas',
@@ -453,6 +460,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['xelor', 'zobal', 'sadida'],
     tier: 'Constamment dans le haut de la méta monocompte et multicompte',
+    playstyles: CLASS_PLAYSTYLES['osamodas'],
   },
   {
     id: 'sadida',
@@ -517,6 +525,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['eniripsa', 'osamodas', 'zobal', 'enutrof'],
     tier: 'Très apprécié en PvM pour polyvalence et apport en soutien/contrôle',
+    playstyles: CLASS_PLAYSTYLES['sadida'],
   },
   {
     id: 'xelor',
@@ -582,6 +591,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['cra', 'eliotrope', 'osamodas'],
     tier: 'Très fort mais exigeant, extrêmement précieux en mains expertes',
+    playstyles: CLASS_PLAYSTYLES['xelor'],
   },
   {
     id: 'enutrof',
@@ -645,6 +655,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['sadida', 'xelor', 'pandawa'],
     tier: 'Utile dans des compositions spécifiques, précieux pour le farm',
+    playstyles: CLASS_PLAYSTYLES['enutrof'],
   },
   {
     id: 'sram',
@@ -709,6 +720,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['iop', 'ouginak', 'ecaflip'],
     tier: 'Très fort en DPT avec les bonnes conditions, redoutable avec un Pandawa',
+    playstyles: CLASS_PLAYSTYLES['sram'],
   },
   {
     id: 'ecaflip',
@@ -772,6 +784,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['iop', 'sram', 'ouginak'],
     tier: 'Solide en PvM grâce à la fréquence de critique élevée, fun factor unique',
+    playstyles: CLASS_PLAYSTYLES['ecaflip'],
   },
   {
     id: 'zobal',
@@ -837,6 +850,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['eniripsa', 'osamodas', 'feca', 'sadida'],
     tier: 'Systématiquement dans le top du méta comme support en PvM',
+    playstyles: CLASS_PLAYSTYLES['zobal'],
   },
   {
     id: 'roublard',
@@ -900,6 +914,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['huppermage', 'eliotrope', 'sram'],
     tier: 'Potentiellement dévastateur mais exige un haut niveau de maîtrise',
+    playstyles: CLASS_PLAYSTYLES['roublard'],
   },
   {
     id: 'ouginak',
@@ -959,6 +974,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['iop', 'sacrieur', 'sram'],
     tier: 'Solide en DPT mêlée, apprécié pour son gameplay dynamique',
+    playstyles: CLASS_PLAYSTYLES['ouginak'],
   },
   {
     id: 'huppermage',
@@ -1024,6 +1040,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['roublard', 'eliotrope', 'cra', 'xelor'],
     tier: 'Très fort en mains expertes, flexibilité totale unique',
+    playstyles: CLASS_PLAYSTYLES['huppermage'],
   },
   {
     id: 'eliotrope',
@@ -1083,6 +1100,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['cra', 'xelor', 'huppermage', 'roublard'],
     tier: 'Très fort une fois maîtrisé, régulièrement cité dans les meilleures options DPT distance',
+    playstyles: CLASS_PLAYSTYLES['eliotrope'],
   },
   {
     id: 'steamer',
@@ -1142,6 +1160,7 @@ export const CLASSES: WakfuClass[] = [
     },
     alternatives: ['feca', 'cra', 'eliotrope'],
     tier: 'Très apprécié dans les compositions distance pour son double rôle DPT/armures',
+    playstyles: CLASS_PLAYSTYLES['steamer'],
   },
 ];
 

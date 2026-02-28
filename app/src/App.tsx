@@ -4,56 +4,67 @@ import { TeamSlot } from './components/TeamSlot';
 import { ClassBrowser } from './components/ClassBrowser';
 import { ClassDetail } from './components/ClassDetail';
 import { TeamAnalysis } from './components/TeamAnalysis';
+import { TeamOverview } from './components/TeamOverview';
 import { PresetSelector } from './components/PresetSelector';
 import { useTeamAnalysis } from './hooks/useTeamAnalysis';
-import type { WakfuClass, PresetTeam } from './types';
+import type { WakfuClass, PresetTeam, SlotState } from './types';
 
-const INITIAL_SLOTS: (string | null)[] = [null, null, null, null, null, null];
+const EMPTY_SLOT: SlotState = { classId: null, playstyleId: null };
+const INITIAL_SLOTS: SlotState[] = Array(6).fill(null).map(() => ({ ...EMPTY_SLOT }));
 
-type ActivePanel = 'browser' | 'analysis';
+type ActivePanel = 'analysis' | 'overview';
 
 export function App() {
-  const [slots, setSlots] = useState<(string | null)[]>(INITIAL_SLOTS);
+  const [slots, setSlots] = useState<SlotState[]>(INITIAL_SLOTS);
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [selectedClass, setSelectedClass] = useState<WakfuClass | null>(null);
-  const [activePanel, setActivePanel] = useState<ActivePanel>('browser');
+  const [activePanel, setActivePanel] = useState<ActivePanel>('overview');
   const [showPresets, setShowPresets] = useState(false);
 
   const analysis = useTeamAnalysis(slots);
 
   const handleSlotClick = useCallback((index: number) => {
     setActiveSlot((prev) => (prev === index ? null : index));
-    setActivePanel('browser');
+    setActivePanel('overview');
   }, []);
 
   const handleRemoveFromSlot = useCallback((index: number) => {
     setSlots((prev) => {
       const next = [...prev];
-      next[index] = null;
+      next[index] = { ...EMPTY_SLOT };
       return next;
     });
     if (activeSlot === index) setActiveSlot(null);
   }, [activeSlot]);
 
+  const handlePlaystyleChange = useCallback((slotIndex: number, playstyleId: string) => {
+    setSlots((prev) => {
+      const next = [...prev];
+      next[slotIndex] = { ...next[slotIndex], playstyleId };
+      return next;
+    });
+  }, []);
+
   const handleSelectClass = useCallback(
     (cls: WakfuClass) => {
       setSelectedClass(cls);
 
-      // If a slot is active, assign the class to it
       if (activeSlot !== null) {
         setSlots((prev) => {
           const next = [...prev];
-          next[activeSlot] = cls.id;
+          next[activeSlot] = {
+            classId: cls.id,
+            playstyleId: cls.playstyles[0]?.id ?? null,
+          };
           return next;
         });
 
         // Move to next empty slot or deactivate
-        const nextEmpty = slots.findIndex((id, i) => i > activeSlot && id === null);
+        const nextEmpty = slots.findIndex((s, i) => i > activeSlot && s.classId === null);
         if (nextEmpty !== -1) {
           setActiveSlot(nextEmpty);
         } else {
-          // try to find any empty slot
-          const anyEmpty = slots.findIndex((id, i) => i !== activeSlot && id === null);
+          const anyEmpty = slots.findIndex((s, i) => i !== activeSlot && s.classId === null);
           setActiveSlot(anyEmpty !== -1 ? anyEmpty : null);
         }
       }
@@ -62,18 +73,25 @@ export function App() {
   );
 
   const handleSelectPreset = useCallback((preset: PresetTeam) => {
-    const newSlots: (string | null)[] = [...INITIAL_SLOTS];
-    preset.slots.forEach((id, i) => {
-      if (i < 6) newSlots[i] = id;
+    const newSlots: SlotState[] = Array(6).fill(null).map(() => ({ ...EMPTY_SLOT }));
+    preset.slots.forEach((classId, i) => {
+      if (i < 6 && classId !== null) {
+        const cls = CLASS_MAP.get(classId);
+        newSlots[i] = {
+          classId,
+          playstyleId: cls?.playstyles[0]?.id ?? null,
+        };
+      }
     });
     setSlots(newSlots);
     setShowPresets(false);
     setActiveSlot(null);
     setSelectedClass(null);
+    setActivePanel('overview');
   }, []);
 
   const handleReset = useCallback(() => {
-    setSlots([...INITIAL_SLOTS]);
+    setSlots(Array(6).fill(null).map(() => ({ ...EMPTY_SLOT })));
     setActiveSlot(null);
     setSelectedClass(null);
   }, []);
@@ -83,7 +101,8 @@ export function App() {
     if (cls) setSelectedClass(cls);
   }, []);
 
-  const filledCount = slots.filter(Boolean).length;
+  const filledCount = slots.filter((s) => s.classId !== null).length;
+  const teamClassIds = slots.map((s) => s.classId);
 
   return (
     <div className="min-h-screen bg-[#0a0e1a] text-white font-sans flex flex-col">
@@ -135,14 +154,15 @@ export function App() {
             )}
           </div>
           <div className="grid grid-cols-6 gap-3">
-            {slots.map((classId, i) => (
+            {slots.map((slot, i) => (
               <TeamSlot
                 key={i}
                 slotIndex={i}
-                classId={classId}
+                slot={slot}
                 isActive={activeSlot === i}
                 onClick={() => handleSlotClick(i)}
                 onRemove={() => handleRemoveFromSlot(i)}
+                onPlaystyleChange={(playstyleId) => handlePlaystyleChange(i, playstyleId)}
               />
             ))}
           </div>
@@ -159,7 +179,7 @@ export function App() {
             </h2>
             <ClassBrowser
               selectedClassId={selectedClass?.id ?? null}
-              teamClassIds={slots}
+              teamClassIds={teamClassIds}
               onSelectClass={handleSelectClass}
             />
           </div>
@@ -170,7 +190,7 @@ export function App() {
           {selectedClass ? (
             <ClassDetail
               cls={selectedClass}
-              teamClassIds={slots}
+              teamClassIds={teamClassIds}
               onAddAlternative={handleAlternativeClick}
             />
           ) : (
@@ -201,10 +221,20 @@ export function App() {
           )}
         </div>
 
-        {/* Right: Analysis */}
+        {/* Right: Analysis / Overview */}
         <div className="w-72 shrink-0">
           {/* Panel switcher */}
           <div className="flex gap-1 mb-3 bg-slate-900/50 rounded-xl p-1 border border-slate-800/60">
+            <button
+              onClick={() => setActivePanel('overview')}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                activePanel === 'overview'
+                  ? 'bg-slate-700 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+            >
+              👥 Vue Équipe
+            </button>
             <button
               onClick={() => setActivePanel('analysis')}
               className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${
@@ -218,13 +248,22 @@ export function App() {
           </div>
 
           <div className="overflow-y-auto max-h-[calc(100vh-280px)]">
-            <TeamAnalysis
-              coverage={analysis.coverage}
-              activeSynergies={analysis.activeSynergies}
-              warnings={analysis.warnings}
-              score={analysis.score}
-              teamSize={analysis.teamSize}
-            />
+            {activePanel === 'overview' ? (
+              <TeamOverview
+                slots={slots}
+                insights={analysis.insights}
+                coverage={analysis.coverage}
+                score={analysis.score}
+              />
+            ) : (
+              <TeamAnalysis
+                coverage={analysis.coverage}
+                activeSynergies={analysis.activeSynergies}
+                warnings={analysis.warnings}
+                score={analysis.score}
+                teamSize={analysis.teamSize}
+              />
+            )}
           </div>
         </div>
       </div>
