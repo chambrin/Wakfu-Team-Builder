@@ -1,5 +1,6 @@
 import { CLASS_MAP } from '../data/classes';
 import type { Dungeon, DungeonDifficulty, SlotState } from '../types';
+import { getClassIcon, getDungeonBossImage } from '../utils/assets';
 
 const DIFFICULTY_COLORS: Record<DungeonDifficulty, string> = {
   debutant: 'text-green-300 bg-green-900/20 border-green-700/40',
@@ -53,7 +54,22 @@ export function DungeonDetail({ dungeon, onLoadComposition, onSelectClass }: Dun
       {/* Header */}
       <div className="bg-slate-800/60 rounded-2xl border border-slate-700/50 p-5">
         <div className="flex items-start gap-4">
-          <div className="text-5xl shrink-0">{dungeon.emoji}</div>
+          <div className="shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-slate-700/50 flex items-center justify-center">
+            {getDungeonBossImage(dungeon.name) ? (
+              <img
+                src={getDungeonBossImage(dungeon.name)!}
+                alt={dungeon.boss}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const el = e.target as HTMLImageElement;
+                  el.style.display = 'none';
+                  el.parentElement!.textContent = dungeon.emoji;
+                }}
+              />
+            ) : (
+              <span className="text-3xl">{dungeon.emoji}</span>
+            )}
+          </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-xl font-bold text-white leading-tight">{dungeon.name}</h2>
             <div className="flex flex-wrap items-center gap-2 mt-2">
@@ -128,7 +144,7 @@ export function DungeonDetail({ dungeon, onLoadComposition, onSelectClass }: Dun
                   className="flex items-center gap-2.5 p-2.5 bg-slate-700/40 hover:bg-slate-700/70 border border-slate-600/40 hover:border-slate-500 rounded-xl transition-all text-left"
                 >
                   <div className="relative shrink-0">
-                    <span className="text-2xl">{cls.emoji}</span>
+                    <img src={getClassIcon(cls.id)} alt={cls.name} className="w-8 h-8 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
                     {i === 0 && (
                       <span className="absolute -top-1 -right-1 text-[8px] bg-amber-500 text-black font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">
                         1

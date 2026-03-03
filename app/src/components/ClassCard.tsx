@@ -1,6 +1,7 @@
 import type { WakfuClass } from '../types';
 import { RoleBadge } from './RoleBadge';
 import { ComplexityBadge } from './ComplexityBadge';
+import { getClassIcon } from '../utils/assets';
 
 interface ClassCardProps {
   cls: WakfuClass;
@@ -24,7 +25,7 @@ export function ClassCard({ cls, isSelected, isInTeam, onClick, compact }: Class
           }`}
       >
         <div className="flex items-center gap-2">
-          <span className="text-xl">{cls.emoji}</span>
+          <img src={getClassIcon(cls.id)} alt={cls.name} className="w-8 h-8 shrink-0 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="font-semibold text-sm text-white truncate">{cls.name}</span>
@@ -52,7 +53,7 @@ export function ClassCard({ cls, isSelected, isInTeam, onClick, compact }: Class
         }`}
     >
       <div className="flex items-start gap-3">
-        <span className="text-2xl mt-0.5">{cls.emoji}</span>
+        <img src={getClassIcon(cls.id)} alt={cls.name} className="w-10 h-10 shrink-0 object-contain mt-0.5" onError={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <span className="font-bold text-white">{cls.name}</span>

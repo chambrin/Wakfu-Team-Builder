@@ -1,22 +1,23 @@
 import type { TeamCoverage, SynergyBonus, TeamWarning } from '../types';
+import { getCharacteristicIcon } from '../utils/assets';
 
 interface CoverageItem {
   key: keyof TeamCoverage;
   label: string;
-  icon: string;
+  stat: string;
   required: boolean;
 }
 
 const COVERAGE_ITEMS: CoverageItem[] = [
-  { key: 'tank', label: 'Tank', icon: '🛡️', required: true },
-  { key: 'heal', label: 'Heal', icon: '💊', required: true },
-  { key: 'dptMelee', label: 'DPT Mêlée', icon: '⚔️', required: true },
-  { key: 'dptDistance', label: 'DPT Distance', icon: '🏹', required: true },
-  { key: 'armor', label: 'Armures', icon: '🔮', required: false },
-  { key: 'removeRes', label: 'Retrait Rés.', icon: '💥', required: false },
-  { key: 'placement', label: 'Placement', icon: '🎯', required: false },
-  { key: 'buffPA', label: 'Buff PA', icon: '⚡', required: false },
-  { key: 'controlePM', label: 'Contrôle PM', icon: '🔗', required: false },
+  { key: 'tank',        label: 'Tank',          stat: 'ARMOR',             required: true  },
+  { key: 'heal',        label: 'Heal',          stat: 'HEAL_IN_PERCENT',   required: true  },
+  { key: 'dptMelee',    label: 'DPT Mêlée',    stat: 'MELEE_DMG',         required: true  },
+  { key: 'dptDistance', label: 'DPT Distance',  stat: 'RANGED_DMG',        required: true  },
+  { key: 'armor',       label: 'Armures',       stat: 'ARMOR_GIVEN',       required: false },
+  { key: 'removeRes',   label: 'Retrait Rés.',  stat: 'RES_IN_PERCENT',    required: false },
+  { key: 'placement',   label: 'Placement',     stat: 'MP',                required: false },
+  { key: 'buffPA',      label: 'Buff PA',       stat: 'AP',                required: false },
+  { key: 'controlePM',  label: 'Contrôle PM',   stat: 'TACKLE',            required: false },
 ];
 
 interface TeamAnalysisProps {
@@ -106,13 +107,18 @@ export function TeamAnalysis({ coverage, activeSynergies, warnings, score, teamS
           <span>✅</span> Couverture des rôles
         </h3>
         <div className="grid grid-cols-1 gap-1.5">
-          {COVERAGE_ITEMS.map(({ key, label, icon, required }) => {
+          {COVERAGE_ITEMS.map(({ key, label, stat, required }) => {
             const count = coverage[key];
             const covered = count > 0;
             return (
               <div key={key} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm">{icon}</span>
+                  <img
+                    src={getCharacteristicIcon(stat)}
+                    alt={label}
+                    className="w-4 h-4 object-contain shrink-0"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
                   <span className={`text-xs ${required ? 'text-slate-200' : 'text-slate-400'}`}>{label}</span>
                   {required && (
                     <span className="text-[9px] text-amber-500/70 font-medium">REQUIS</span>

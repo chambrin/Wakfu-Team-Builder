@@ -1,6 +1,19 @@
 import type { SlotState, TeamInsight, TeamCoverage, WakfuClass } from '../types';
 import { CLASS_MAP } from '../data/classes';
 import { getEffectiveProvides } from '../hooks/useTeamAnalysis';
+import { getClassIcon, getCharacteristicIcon } from '../utils/assets';
+
+const CONTRIB_STAT: Record<string, string> = {
+  'Tank':         'ARMOR',
+  'Heal':         'HEAL_IN_PERCENT',
+  'DPT Mêlée':   'MELEE_DMG',
+  'DPT Distance': 'RANGED_DMG',
+  'Armures':      'ARMOR_GIVEN',
+  '−Rés.':        'RES_IN_PERCENT',
+  'Placement':    'MP',
+  'Buff PA':      'AP',
+  '−PM':          'TACKLE',
+};
 
 interface TeamOverviewProps {
   slots: SlotState[];
@@ -113,7 +126,7 @@ export function TeamOverview({ slots, insights, coverage, score }: TeamOverviewP
 
             return (
               <div key={i} className="flex items-start gap-2.5 p-2.5 bg-slate-700/30 rounded-xl">
-                <span className="text-xl shrink-0">{cls.emoji}</span>
+                <img src={getClassIcon(cls.id)} alt={cls.name} className="w-8 h-8 shrink-0 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-1.5 flex-wrap">
                     <span className="text-sm font-bold text-white">{cls.name}</span>
@@ -124,7 +137,15 @@ export function TeamOverview({ slots, insights, coverage, score }: TeamOverviewP
                   {contrib.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">
                       {contrib.map((c) => (
-                        <span key={c} className="text-[9px] bg-slate-600/60 text-slate-300 px-1.5 py-0.5 rounded-full border border-slate-500/30">
+                        <span key={c} className="flex items-center gap-1 text-[9px] bg-slate-600/60 text-slate-300 px-1.5 py-0.5 rounded-full border border-slate-500/30">
+                          {CONTRIB_STAT[c] && (
+                            <img
+                              src={getCharacteristicIcon(CONTRIB_STAT[c])}
+                              alt=""
+                              className="w-3 h-3 object-contain"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            />
+                          )}
                           {c}
                         </span>
                       ))}

@@ -1,5 +1,6 @@
 import { CLASS_MAP } from '../data/classes';
 import type { SlotState } from '../types';
+import { getClassIcon } from '../utils/assets';
 
 interface TeamSlotProps {
   slotIndex: number;
@@ -59,7 +60,7 @@ export function TeamSlot({ slotIndex, slot, isActive, onClick, onRemove, onPlays
 
       {/* Class info */}
       <div className="flex flex-col items-center gap-1 pt-0.5">
-        <span className="text-2xl">{cls.emoji}</span>
+        <img src={getClassIcon(cls.id)} alt={cls.name} className="w-10 h-10 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
         <div className="text-center">
           <div className="font-bold text-white text-xs leading-tight">{cls.name}</div>
         </div>

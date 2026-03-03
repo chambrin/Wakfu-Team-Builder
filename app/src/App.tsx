@@ -8,6 +8,7 @@ import { TeamOverview } from './components/TeamOverview';
 import { PresetSelector } from './components/PresetSelector';
 import { DungeonBrowser } from './components/DungeonBrowser';
 import { DungeonDetail } from './components/DungeonDetail';
+import { QuestTracker } from './components/QuestTracker';
 import { useTeamAnalysis } from './hooks/useTeamAnalysis';
 import type { WakfuClass, PresetTeam, SlotState, Dungeon } from './types';
 
@@ -15,10 +16,16 @@ const EMPTY_SLOT: SlotState = { classId: null, playstyleId: null };
 const INITIAL_SLOTS: SlotState[] = Array(6).fill(null).map(() => ({ ...EMPTY_SLOT }));
 
 type ActivePanel = 'analysis' | 'overview';
-type AppMode = 'builder' | 'donjons';
+type AppMode = 'quetes' | 'builder' | 'donjons';
+
+const NAV_ITEMS: { mode: AppMode; label: string; icon: string }[] = [
+  { mode: 'quetes', label: 'Quêtes', icon: '📜' },
+  { mode: 'builder', label: 'Team Builder', icon: '⚔️' },
+  { mode: 'donjons', label: 'Donjons', icon: '🏰' },
+];
 
 export function App() {
-  const [appMode, setAppMode] = useState<AppMode>('builder');
+  const [appMode, setAppMode] = useState<AppMode>('quetes');
   const [slots, setSlots] = useState<SlotState[]>(INITIAL_SLOTS);
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [selectedClass, setSelectedClass] = useState<WakfuClass | null>(null);
@@ -64,7 +71,6 @@ export function App() {
           return next;
         });
 
-        // Move to next empty slot or deactivate
         const nextEmpty = slots.findIndex((s, i) => i > activeSlot && s.classId === null);
         if (nextEmpty !== -1) {
           setActiveSlot(nextEmpty);
@@ -127,49 +133,45 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#0a0e1a] text-white font-sans flex flex-col">
-      {/* Header */}
-      <header className="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-sm sticky top-0 z-40">
-        <div className="max-w-[1600px] mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+      {/* ── Navbar ──────────────────────────────────────────────────────────── */}
+      <header className="border-b border-slate-800/80 bg-slate-900/70 backdrop-blur-sm sticky top-0 z-40">
+        <div className="max-w-[1600px] mx-auto px-4 h-14 flex items-center justify-between gap-4">
+          {/* Logo */}
+          <div className="flex items-center gap-3 shrink-0">
             <div className="text-2xl">⚔️</div>
             <div>
-              <h1 className="text-lg font-bold text-white leading-none" style={{ fontFamily: 'Cinzel, serif' }}>
-                Wakfu Team Builder
+              <h1 className="text-base font-bold text-white leading-none" style={{ fontFamily: 'Cinzel, serif' }}>
+                Wakfu Builder
               </h1>
-              <div className="text-[10px] text-slate-400 mt-0.5">Constructeur de teams de 6 — PvM multicompte</div>
+              <div className="text-[10px] text-slate-500 mt-0.5">PvM multicompte</div>
             </div>
           </div>
 
-          {/* Mode switcher */}
-          <div className="flex items-center gap-1 bg-slate-800/60 rounded-xl p-1 border border-slate-700/60">
-            <button
-              onClick={() => setAppMode('builder')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                appMode === 'builder'
-                  ? 'bg-amber-600/30 text-amber-300 border border-amber-600/40'
-                  : 'text-slate-400 hover:text-slate-300'
-              }`}
-            >
-              ⚔️ Team Builder
-            </button>
-            <button
-              onClick={() => setAppMode('donjons')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                appMode === 'donjons'
-                  ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-600/40'
-                  : 'text-slate-400 hover:text-slate-300'
-              }`}
-            >
-              🏰 Donjons
-            </button>
-          </div>
+          {/* Nav tabs */}
+          <nav className="flex items-center gap-1">
+            {NAV_ITEMS.map(({ mode, label, icon }) => (
+              <button
+                key={mode}
+                onClick={() => setAppMode(mode)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                  appMode === mode
+                    ? 'bg-amber-600/20 text-amber-300 border border-amber-600/30'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                }`}
+              >
+                <span>{icon}</span>
+                <span>{label}</span>
+              </button>
+            ))}
+          </nav>
 
-          <div className="flex items-center gap-2">
+          {/* Right actions (builder only) */}
+          <div className="flex items-center gap-2 shrink-0 min-w-[160px] justify-end">
             {appMode === 'builder' && (
               <>
-                <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400">
-                  <span className="text-amber-400 font-bold">{filledCount}</span>/6 classes
-                </div>
+                <span className="hidden sm:block text-xs text-slate-500">
+                  <span className="text-amber-400 font-bold">{filledCount}</span>/6
+                </span>
                 <button
                   onClick={() => setShowPresets(true)}
                   className="px-3 py-1.5 rounded-xl bg-indigo-600/20 border border-indigo-600/40 text-indigo-300 text-xs font-medium hover:bg-indigo-600/30 transition-all"
@@ -187,6 +189,13 @@ export function App() {
           </div>
         </div>
       </header>
+
+      {/* ── QUÊTES MODE ───────────────────────────────────────────────────── */}
+      {appMode === 'quetes' && (
+        <div className="flex-1 max-w-[1600px] mx-auto w-full px-4 py-4 overflow-hidden">
+          <QuestTracker />
+        </div>
+      )}
 
       {/* ── TEAM BUILDER MODE ─────────────────────────────────────────────── */}
       {appMode === 'builder' && (

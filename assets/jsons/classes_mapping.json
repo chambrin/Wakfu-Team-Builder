@@ -1,0 +1,128 @@
+{
+  "1": {
+    "name": "Féca",
+    "slug": "feca",
+    "icon": "1.png",
+    "illus_m": "10.png",
+    "illus_f": "11.png"
+  },
+  "2": {
+    "name": "Osamodas",
+    "slug": "osamodas",
+    "icon": "2.png",
+    "illus_m": "20.png",
+    "illus_f": "21.png"
+  },
+  "3": {
+    "name": "Enutrof",
+    "slug": "enutrof",
+    "icon": "3.png",
+    "illus_m": "30.png",
+    "illus_f": "31.png"
+  },
+  "4": {
+    "name": "Sram",
+    "slug": "sram",
+    "icon": "4.png",
+    "illus_m": "40.png",
+    "illus_f": "41.png"
+  },
+  "5": {
+    "name": "Xélor",
+    "slug": "xelor",
+    "icon": "5.png",
+    "illus_m": "50.png",
+    "illus_f": "51.png"
+  },
+  "6": {
+    "name": "Ecaflip",
+    "slug": "ecaflip",
+    "icon": "6.png",
+    "illus_m": "60.png",
+    "illus_f": "61.png"
+  },
+  "7": {
+    "name": "Eniripsa",
+    "slug": "eniripsa",
+    "icon": "7.png",
+    "illus_m": "70.png",
+    "illus_f": "71.png"
+  },
+  "8": {
+    "name": "Iop",
+    "slug": "iop",
+    "icon": "8.png",
+    "illus_m": "80.png",
+    "illus_f": "81.png"
+  },
+  "9": {
+    "name": "Crâ",
+    "slug": "cra",
+    "icon": "9.png",
+    "illus_m": "90.png",
+    "illus_f": "91.png"
+  },
+  "10": {
+    "name": "Sadida",
+    "slug": "sadida",
+    "icon": "10.png",
+    "illus_m": "100.png",
+    "illus_f": "101.png"
+  },
+  "11": {
+    "name": "Sacrieur",
+    "slug": "sacrier",
+    "icon": "11.png",
+    "illus_m": "110.png",
+    "illus_f": "111.png"
+  },
+  "12": {
+    "name": "Pandawa",
+    "slug": "pandawa",
+    "icon": "12.png",
+    "illus_m": "120.png",
+    "illus_f": "121.png"
+  },
+  "13": {
+    "name": "Roublard",
+    "slug": "roublard",
+    "icon": "13.png",
+    "illus_m": "130.png",
+    "illus_f": "131.png"
+  },
+  "14": {
+    "name": "Zobal",
+    "slug": "zobal",
+    "icon": "14.png",
+    "illus_m": "140.png",
+    "illus_f": "141.png"
+  },
+  "15": {
+    "name": "Ouginak",
+    "slug": "ouginak",
+    "icon": "15.png",
+    "illus_m": "150.png",
+    "illus_f": "151.png"
+  },
+  "16": {
+    "name": "Steamer",
+    "slug": "steamer",
+    "icon": "16.png",
+    "illus_m": "160.png",
+    "illus_f": "161.png"
+  },
+  "18": {
+    "name": "Eliotrope",
+    "slug": "eliotrope",
+    "icon": "18.png",
+    "illus_m": "180.png",
+    "illus_f": "181.png"
+  },
+  "19": {
+    "name": "Huppermage",
+    "slug": "huppermage",
+    "icon": "19.png",
+    "illus_m": "190.png",
+    "illus_f": "191.png"
+  }
+}

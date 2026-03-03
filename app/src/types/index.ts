@@ -136,3 +136,30 @@ export interface TeamInsight {
   title: string;
   description: string;
 }
+
+// ── Quêtes ────────────────────────────────────────────────────────────────────
+
+export type QuestStatus = 'todo' | 'in-progress' | 'done';
+export type QuestCategory = 'principale' | 'annexe' | 'mercenaire';
+
+export interface Quest {
+  id: string;
+  name: string;
+  levelMin: number;
+  levelMax?: number;
+  zone?: string;
+  description?: string;
+  rewards?: string[];
+  repeatable?: boolean;
+  important?: boolean;
+}
+
+export interface QuestGroup {
+  id: string;
+  name: string;
+  icon: string;
+  category: QuestCategory;
+  levelMin: number;
+  levelMax?: number;
+  quests: Quest[];
+}

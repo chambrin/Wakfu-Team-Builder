@@ -2,6 +2,33 @@ import type { WakfuClass } from '../types';
 import { CLASS_MAP } from '../data/classes';
 import { RoleBadge } from './RoleBadge';
 import { ComplexityBadge } from './ComplexityBadge';
+import { getClassIcon, getClassIllustration, getSmallElementIcon } from '../utils/assets';
+
+/** Détecte les éléments mentionnés dans un texte Wakfu */
+const ELEMENT_KEYWORDS: [RegExp, string][] = [
+  [/\bfeu\b/i,      'FIRE'],
+  [/\bignifuge\b/i, 'FIRE'],
+  [/\beau\b/i,      'WATER'],
+  [/\baquatique\b/i,'WATER'],
+  [/\bsoins?\b/i,   'WATER'],
+  [/\bair\b/i,      'AIR'],
+  [/\béolien\b/i,   'AIR'],
+  [/\bterre\b/i,    'EARTH'],
+  [/\btellurique\b/i,'EARTH'],
+  [/\blumière\b/i,  'LIGHT'],
+  [/\bsacré\b/i,    'LIGHT'],
+  [/\bstase\b/i,    'STASIS'],
+  [/\bmécanique\b/i,'STASIS'],
+  [/\bphysique\b/i, 'PHYSICAL'],
+];
+
+function detectElements(text: string): string[] {
+  const found = new Set<string>();
+  for (const [pattern, element] of ELEMENT_KEYWORDS) {
+    if (pattern.test(text)) found.add(element);
+  }
+  return Array.from(found);
+}
 
 interface ClassDetailProps {
   cls: WakfuClass;
@@ -17,7 +44,19 @@ export function ClassDetail({ cls, teamClassIds, onAddAlternative }: ClassDetail
       {/* Header */}
       <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl border border-slate-700/50 p-5">
         <div className="flex items-start gap-4">
-          <div className="text-5xl">{cls.emoji}</div>
+          <div className="relative shrink-0 w-16 h-16">
+            <img
+              src={getClassIllustration(cls.id)}
+              alt={cls.name}
+              className="w-full h-full object-cover rounded-xl"
+              onError={(e) => {
+                const img = e.target as HTMLImageElement;
+                img.onerror = null;
+                img.src = getClassIcon(cls.id);
+                img.className = 'w-full h-full object-contain';
+              }}
+            />
+          </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
               <h2 className="text-xl font-bold text-white">{cls.name}</h2>
@@ -75,12 +114,26 @@ export function ClassDetail({ cls, teamClassIds, onAddAlternative }: ClassDetail
           <span>⚙️</span> Mécaniques clés
         </h3>
         <div className="space-y-3">
-          {cls.mechanics.map((m, i) => (
-            <div key={i} className="border-l-2 border-amber-700/50 pl-3">
-              <div className="text-xs font-semibold text-amber-300 mb-0.5">{m.name}</div>
-              <div className="text-xs text-slate-400 leading-relaxed">{m.description}</div>
-            </div>
-          ))}
+          {cls.mechanics.map((m, i) => {
+            const elements = detectElements(m.name + ' ' + m.description);
+            return (
+              <div key={i} className="border-l-2 border-amber-700/50 pl-3">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-xs font-semibold text-amber-300">{m.name}</span>
+                  {elements.map((el) => (
+                    <img
+                      key={el}
+                      src={getSmallElementIcon(el)}
+                      alt={el}
+                      className="w-3.5 h-3.5 object-contain"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  ))}
+                </div>
+                <div className="text-xs text-slate-400 leading-relaxed">{m.description}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -118,7 +171,7 @@ export function ClassDetail({ cls, teamClassIds, onAddAlternative }: ClassDetail
                     : 'bg-slate-700/30 border border-transparent'
                 }`}
               >
-                <span className="text-lg">{ally.emoji}</span>
+                <img src={getClassIcon(ally.id)} alt={ally.name} className="w-7 h-7 shrink-0 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="text-xs font-semibold text-white">{ally.name}</span>
@@ -155,7 +208,7 @@ export function ClassDetail({ cls, teamClassIds, onAddAlternative }: ClassDetail
                 }`}
                 title={inTeam ? 'Déjà dans la team' : `Voir ${alt.name}`}
               >
-                <span>{alt.emoji}</span>
+                <img src={getClassIcon(alt.id)} alt={alt.name} className="w-4 h-4 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
                 <span>{alt.name}</span>
                 {inTeam && <span className="text-indigo-400">✓</span>}
               </button>
